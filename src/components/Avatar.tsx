@@ -46,11 +46,10 @@ export const Avatar: React.FC<AvatarProps> = ({
 
       {useStatus && (
         <span
-          className="absolute bottom-0 right-0 border-2 border-foreground/10 rounded-full"
+          className={`absolute bottom-0 right-0 border-2 border-foreground/10 rounded-full ${StatusColors[status]}`}
           style={{
             width: size * 0.3,
             height: size * 0.3,
-            backgroundColor: StatusColors[status] || StatusColors.offline,
           }}
         />
       )}
