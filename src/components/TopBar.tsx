@@ -1,7 +1,7 @@
 import { ThemeToggle } from "./ThemeToggle";
 import { AddFriend } from "./AddFriend";
 import { Settings } from "./Settings";
-import { Notifications } from "./Notfications";
+import { Notifications } from "./Notifications";
 import { StartNewChat } from "./StartNewChat";
 
 export const TopBar = () => {
