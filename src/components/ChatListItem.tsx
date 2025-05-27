@@ -11,7 +11,7 @@ interface FriendListItemProps {
 
 export const ChatListItem = ({ chat }: FriendListItemProps) => {
   const { user } = useAuth();
-  const { selectedChatId, setSelectedChatId } = useChatApp();
+  const { selectedChatId, setSelectedChatId, setSelectedChat } = useChatApp();
 
   const friendsId = chat?.participants?.find((id) => id !== user?.uid) ?? null;
 
@@ -44,7 +44,10 @@ export const ChatListItem = ({ chat }: FriendListItemProps) => {
         chat.id === selectedChatId ? "bg-primary/10" : ""
       }`}
       title={chatName}
-      onClick={() => setSelectedChatId(chat.id)}
+      onClick={() => {
+        setSelectedChatId(chat.id);
+        setSelectedChat(chat);
+      }}
     >
       <Avatar
         url={photoUrl}

@@ -34,7 +34,9 @@ interface ChatAppContextType {
   chatsLoading: boolean;
 
   selectedChatId: string | null;
+  selectedChat: Chat | null;
   setSelectedChatId: React.Dispatch<React.SetStateAction<string | null>>;
+  setSelectedChat: React.Dispatch<React.SetStateAction<Chat | null>>;
   startChatWithFriend: (
     friendUid: string,
     friendName: string,
@@ -60,7 +62,7 @@ export const ChatAppProvider: React.FC<ChatAppProviderProps> = ({
   const userId = user?.uid;
 
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
-
+  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   useNotificationListener(selectedChatId);
 
   const startChatWithFriend = async (
@@ -103,6 +105,9 @@ export const ChatAppProvider: React.FC<ChatAppProviderProps> = ({
       }
 
       setSelectedChatId(existingChatDoc.id);
+
+      setSelectedChat({ id: existingChatDoc.id, ...data } as Chat);
+
       return existingChatDoc.id;
     }
 
@@ -138,7 +143,9 @@ export const ChatAppProvider: React.FC<ChatAppProviderProps> = ({
         chats,
         chatsLoading,
         selectedChatId,
+        selectedChat,
         setSelectedChatId,
+        setSelectedChat,
         startChatWithFriend,
       }}
     >
