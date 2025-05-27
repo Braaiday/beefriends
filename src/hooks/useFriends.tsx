@@ -33,10 +33,13 @@ export const useFriends = () => {
         if (!otherUid) return null;
 
         const friendlyNames = data.friendlyNames ?? {};
+        const friendlyUrls = data.photoURLs ?? {};
 
         return {
+          id: doc.id,
           friendUid: otherUid,
           friendName: friendlyNames[otherUid] ?? "Unknown",
+          friendPhotoURL: friendlyUrls[otherUid] ?? "Unknown",
         };
       })
       .filter((friend): friend is Friend => friend !== null);

@@ -77,6 +77,10 @@ export const AddFriendForm = () => {
           [user.uid]: user.displayName,
           [targetUid]: data.friendDisplayName,
         },
+        photoURLs: {
+          [user.uid]: user.photoURL,
+          [targetUid]: userDoc.photoURL,
+        },
         status: "pending",
         initiatedBy: user.uid,
         createdAt: serverTimestamp(),

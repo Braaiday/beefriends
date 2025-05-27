@@ -1,7 +1,8 @@
 export interface Chat {
   id: string;
   participants: string[];
-  friendlyNames: string[];
+  friendlyNames: Record<string, string>; 
+  photoURLs: Record<string, string>; 
   type: "private" | "group";
   createdAt: Date;
   updatedAt: Date;

@@ -5,4 +5,5 @@ export interface Invitation {
   status: "pending" | "accepted" | "rejected";
   initiatedBy: string;
   friendlyNames: Record<string, string>;
+  photoURLs: Record<string, string>;
 }

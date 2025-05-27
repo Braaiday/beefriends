@@ -27,7 +27,7 @@ export const Sidebar = () => {
       )}
 
       {chats.map((chat) => {
-        return <ChatListItem chat={chat} />;
+        return <ChatListItem chat={chat} key={chat.id} />;
       })}
     </aside>
   );

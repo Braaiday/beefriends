@@ -1,32 +1,25 @@
 import { useChatApp } from "../context/ChatAppProvider";
-import { useUserProfile } from "../hooks/useUserProfile";
 import { useUserStatus } from "../hooks/useUserStatus";
+import type { Friend } from "../types/Friend";
 import { StatusColors } from "../types/StatusColors";
 import { Avatar } from "./Avatar";
 
-interface ProcessedFriend {
-  friendUid: string;
-  friendName: string;
-}
-
 interface FriendListItemProps {
-  friend: ProcessedFriend;
+  friend: Friend;
 }
 
 export const FriendListItem = ({ friend }: FriendListItemProps) => {
   const status = useUserStatus(friend.friendUid) || "offline";
 
-  const { userProfiles } = useUserProfile(friend.friendUid);
-
-  const friendProfile = userProfiles?.[0];
-  const photoUrl = friendProfile?.photoURL ?? "";
-
   const { startChatWithFriend } = useChatApp();
 
   const handleClick = async () => {
     try {
-      await startChatWithFriend(friend.friendUid, friend.friendName);
-      // Optional: you might want to close a modal or drawer if applicable
+      await startChatWithFriend(
+        friend.friendUid,
+        friend.friendName,
+        friend.friendPhotoURL
+      );
     } catch (error) {
       console.error("Failed to start chat:", error);
     }
@@ -38,7 +31,7 @@ export const FriendListItem = ({ friend }: FriendListItemProps) => {
       className="flex items-center gap-3 hover:bg-primary/10 px-3 py-2 rounded-lg cursor-pointer transition-colors"
       onClick={handleClick}
     >
-      <Avatar url={photoUrl} displayName={friend.friendName} />
+      <Avatar url={friend.friendPhotoURL} displayName={friend.friendName} />
 
       <div className="flex flex-col">
         <span className="text-sm font-medium">{friend.friendName}</span>

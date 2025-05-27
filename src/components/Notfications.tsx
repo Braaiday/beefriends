@@ -5,35 +5,33 @@ import { useAuth } from "../context/AuthProvider";
 import { updateDoc, doc } from "firebase/firestore";
 import { firestore } from "../firebase/firebase";
 import { useChatApp } from "../context/ChatAppProvider";
+import { Avatar } from "./Avatar"; // Adjust the import path as needed
 
 export const Notifications = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
+  const { invitations, invitationCount } = useChatApp();
 
   const openDrawer = () => setIsOpen(true);
   const closeDrawer = () => setIsOpen(false);
 
-  const { user } = useAuth();
-
-  const { invitations, invitationCount } = useChatApp();
-
-  const handleAccept = async (id: string) => {
-    await updateDoc(doc(firestore, "friendships", id), {
-      status: "accepted",
-    });
+  const handleUpdateStatus = async (
+    id: string,
+    status: "accepted" | "declined"
+  ) => {
+    await updateDoc(doc(firestore, "friendships", id), { status });
   };
 
-  const handleDecline = async (id: string) => {
-    await updateDoc(doc(firestore, "friendships", id), {
-      status: "declined",
-    });
-  };
+  const filteredInvitations = invitations.filter(
+    (inv) => inv.initiatedBy !== user?.uid
+  );
 
   return (
     <>
-      {/* Trigger Button */}
+      {/* Notification Button */}
       <button
         onClick={openDrawer}
-        className="p-2 rounded-full hover:bg-primary/10 transition relative hover:cursor-pointer"
+        className="p-2 rounded-full hover:bg-primary/10 transition relative"
         title="Notifications"
       >
         <Icon
@@ -47,7 +45,7 @@ export const Notifications = () => {
         )}
       </button>
 
-      {/* Drawer Dialog */}
+      {/* Notifications Drawer */}
       <Transition.Root show={isOpen} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={closeDrawer}>
           <Transition.Child
@@ -59,7 +57,7 @@ export const Notifications = () => {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-background/50 bg-opacity-10" />
+            <div className="fixed inset-0 bg-background/50" />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-hidden">
@@ -79,63 +77,81 @@ export const Notifications = () => {
                       <h2 className="text-lg font-semibold text-foreground">
                         Notifications
                       </h2>
-                      <button onClick={closeDrawer}>
+                      <button onClick={closeDrawer} aria-label="Close">
                         <Icon
                           icon="solar:close-circle-bold-duotone"
                           className="w-6 h-6 text-muted-foreground hover:text-primary"
                         />
                       </button>
                     </div>
-                    {invitationCount === 0 ? (
-                      <div className="p-3 bg-muted rounded-md">
+
+                    {filteredInvitations.length === 0 ? (
+                      <div className="p-3 bg-muted rounded-md text-center text-sm text-muted-foreground">
                         No pending invitations.
                       </div>
                     ) : (
-                      <div className="space-y-2">
-                        {invitations
-                          .filter((data) => {
-                            return data.initiatedBy !== user?.uid;
-                          })
-                          .map((data) => {
-                            const senderUid = data.initiatedBy;
-                            const senderName =
-                              data.friendlyNames?.[senderUid] ?? "Unknown";
+                      <ul className="space-y-2">
+                        {filteredInvitations.map((invitation) => {
+                          const senderUid = invitation.initiatedBy;
+                          const senderName =
+                            invitation.friendlyNames?.[senderUid] ?? "Unknown";
 
-                            return (
-                              <div
-                                key={data.id}
-                                className="p-3 bg-muted rounded-md flex justify-between items-center"
-                              >
-                                <div>
-                                  Friend request from{" "}
-                                  <strong>{senderName}</strong>
-                                </div>
-                                <div className="flex space-x-2">
-                                  <button
-                                    onClick={() => handleAccept(data.id)}
-                                    className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition"
-                                    title="Accept"
-                                  >
-                                    <Icon
-                                      icon="mdi:check-bold"
-                                      className="w-4 h-4"
-                                    />
-                                  </button>
-                                  <button
-                                    onClick={() => handleDecline(data.id)}
-                                    className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition"
-                                    title="Decline"
-                                  >
-                                    <Icon
-                                      icon="mdi:close-thick"
-                                      className="w-4 h-4"
-                                    />
-                                  </button>
+                          return (
+                            <li
+                              key={invitation.id}
+                              className="p-3 bg-muted rounded-md flex items-center justify-between gap-3"
+                            >
+                              <div className="flex items-center gap-3">
+                                <Avatar
+                                  url={invitation.photoURLs[senderUid]}
+                                  displayName={senderName}
+                                  size={36}
+                                />
+                                <div className="text-sm text-foreground">
+                                  <div>
+                                    <strong>{senderName}</strong>
+                                  </div>
+                                  <div className="text-muted-foreground text-xs">
+                                    sent you a friend request
+                                  </div>
                                 </div>
                               </div>
-                            );
-                          })}
-                      </div>
+                              <div className="flex space-x-1">
+                                <button
+                                  onClick={() =>
+                                    handleUpdateStatus(
+                                      invitation.id,
+                                      "accepted"
+                                    )
+                                  }
+                                  className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition"
+                                  title="Accept"
+                                >
+                                  <Icon
+                                    icon="mdi:check-bold"
+                                    className="w-4 h-4"
+                                  />
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    handleUpdateStatus(
+                                      invitation.id,
+                                      "declined"
+                                    )
+                                  }
+                                  className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition"
+                                  title="Decline"
+                                >
+                                  <Icon
+                                    icon="mdi:close-thick"
+                                    className="w-4 h-4"
+                                  />
+                                </button>
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
                     )}
                   </Dialog.Panel>
                 </Transition.Child>

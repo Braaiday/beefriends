@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Outlet, Route, Routes } from "react-router-dom";
 import { Home } from "./pages/Home";
 import { NotFound } from "./pages/NotFound";
 import { Login } from "./pages/Login";
@@ -6,6 +6,7 @@ import { ChatApp } from "./pages/ChatApp";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { SignUp } from "./pages/SignUp";
 import { Settings } from "./pages/Settings";
+import { ChatAppProvider } from "./context/ChatAppProvider";
 
 function App() {
   return (
@@ -16,24 +17,20 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
 
-        {/* Protected app routes */}
+        {/* Chat App Routes*/}
         <Route
-          path="/app/*"
+          path="/app"
           element={
             <ProtectedRoute>
-              <ChatApp />
+              <ChatAppProvider>
+                <Outlet />
+              </ChatAppProvider>
             </ProtectedRoute>
           }
-        />
-
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          }
-        />
+        >
+          <Route index element={<ChatApp />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
 
         <Route path="*" element={<NotFound />} />
       </Routes>

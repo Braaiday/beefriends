@@ -24,7 +24,7 @@ export const Settings = () => {
           <MenuItem>
             {({ active }) => (
               <button
-                onClick={() => navigate("/settings")}
+                onClick={() => navigate("settings")}
                 className={`w-full text-left px-4 py-2 text-sm ${
                   active ? "bg-primary/10 text-foreground" : "text-foreground"
                 }`}

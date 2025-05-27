@@ -8,8 +8,9 @@ import { RadioGroup } from "@headlessui/react";
 import clsx from "clsx";
 import { cn } from "../lib/utils";
 import { useNavigate } from "react-router-dom";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, writeBatch } from "firebase/firestore";
 import { firestore } from "../firebase/firebase";
+import { useChatApp } from "../context/ChatAppProvider";
 
 // Sample avatar options
 const beeAvatars = [
@@ -29,6 +30,7 @@ type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 export const Settings = () => {
   const { user } = useAuth();
+  const { chats, invitations, friends } = useChatApp();
   const navigate = useNavigate();
 
   const {
@@ -68,10 +70,40 @@ export const Settings = () => {
         photoURL: data.photoURL,
       });
 
-      // Update to 'userProfiles' collection for public lookup
+      // Update public profile
       await updateDoc(doc(firestore, "userProfiles", user.uid), {
         photoURL: data.photoURL,
       });
+
+      // Update photoURLs in chats and friendships (invitations)
+      const batch = writeBatch(firestore);
+
+      chats
+        .filter((chat) => chat.participants.includes(user.uid))
+        .forEach((chat) => {
+          const chatDocRef = doc(firestore, "chats", chat.id);
+          batch.update(chatDocRef, {
+            [`photoURLs.${user.uid}`]: data.photoURL,
+          });
+        });
+
+      invitations
+        .filter((inv) => inv.participants.includes(user.uid))
+        .forEach((invitation) => {
+          const invDocRef = doc(firestore, "friendships", invitation.id);
+          batch.update(invDocRef, {
+            [`photoURLs.${user.uid}`]: data.photoURL,
+          });
+        });
+
+      friends.forEach((friend) => {
+        const invDocRef = doc(firestore, "friendships", friend.id);
+        batch.update(invDocRef, {
+          [`photoURLs.${user.uid}`]: data.photoURL,
+        });
+      });
+
+      await batch.commit();
 
       navigate("/app");
     } catch (error) {

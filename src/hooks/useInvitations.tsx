@@ -21,13 +21,15 @@ export const useInvitations = () => {
   const invitations: Invitation[] =
     snapshot?.docs.map((doc) => {
       const data = doc.data();
+
       return {
         id: doc.id,
-        createdAt: data.createdAt.toDate(),
+        createdAt: data.createdAt?.toDate?.() ?? new Date(0),
         participants: data.participants,
         status: data.status,
         initiatedBy: data.initiatedBy,
         friendlyNames: data.friendlyNames,
+        photoURLs: data.photoURLs,
       } as Invitation;
     }) ?? [];
 

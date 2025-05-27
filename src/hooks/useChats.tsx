@@ -23,6 +23,7 @@ export const useChats = () => {
         id: doc.id,
         participants: data.participants,
         friendlyNames: data.friendlyNames,
+        photoURLs: data.photoURLs,
         type: data.type,
         createdAt: data.createdAt?.toDate?.() ?? new Date(0),
         updatedAt: data.updatedAt?.toDate?.() ?? new Date(0),

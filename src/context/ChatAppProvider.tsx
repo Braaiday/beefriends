@@ -35,7 +35,8 @@ interface ChatAppContextType {
   setSelectedChatId: React.Dispatch<React.SetStateAction<string | null>>;
   startChatWithFriend: (
     friendUid: string,
-    friendName: string
+    friendName: string,
+    friendPhotoURL: string
   ) => Promise<string | null>;
 }
 
@@ -59,7 +60,8 @@ export const ChatAppProvider: React.FC<ChatAppProviderProps> = ({
 
   const startChatWithFriend = async (
     friendUid: string,
-    friendName: string
+    friendName: string,
+    friendPhotoURL: string
   ): Promise<string | null> => {
     if (!userId) return null;
 
@@ -90,7 +92,14 @@ export const ChatAppProvider: React.FC<ChatAppProviderProps> = ({
 
     const newChatDoc = await addDoc(chatsRef, {
       participants: [userId, friendUid],
-      friendlyNames: [user.displayName, friendName],
+      friendlyNames: {
+        [user.uid]: user.displayName,
+        [friendUid]: friendName,
+      },
+      photoURLs: {
+        [user.uid]: user.photoURL,
+        [friendUid]: friendPhotoURL,
+      },
       type: "private",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),

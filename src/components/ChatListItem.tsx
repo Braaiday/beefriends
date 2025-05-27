@@ -1,6 +1,5 @@
 import { useAuth } from "../context/AuthProvider";
 import { useChatApp } from "../context/ChatAppProvider";
-import { useUserProfile } from "../hooks/useUserProfile";
 import { useUserStatus } from "../hooks/useUserStatus";
 import type { Chat } from "../types/Chat";
 import { Avatar } from "./Avatar";
@@ -18,8 +17,6 @@ export const ChatListItem = ({ chat }: FriendListItemProps) => {
 
   const status = useUserStatus(friendsId) || "offline";
 
-  const { userProfiles } = useUserProfile(friendsId);
-
   const lastMsg = chat.lastMessage;
 
   // Format time like "5 minutes ago"
@@ -29,20 +26,8 @@ export const ChatListItem = ({ chat }: FriendListItemProps) => {
       })
     : "";
 
-  // Derive display name
-  let chatName = chat.name;
-  if (chat.type === "private") {
-    const otherIndex = chat.participants.findIndex((p) => p !== user?.uid);
-    chatName = chat.friendlyNames[otherIndex] || "Unnamed Chat";
-  }
-
-  const friendProfile = userProfiles?.[0];
-
-  if (friendProfile) {
-    chatName = friendProfile?.displayName ?? "Unknown";
-  }
-
-  const photoUrl = friendProfile?.photoURL ?? "";
+  const chatName = chat.friendlyNames[friendsId ?? 0];
+  const photoUrl = chat.photoURLs[friendsId ?? 0];
 
   if (!user?.uid) return null;
   const unreadCount = chat.unreadCounts?.[user?.uid] ?? 0;
