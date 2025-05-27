@@ -25,15 +25,21 @@ const subscribers: ((t: InternalToast) => void)[] = [];
 
 const notify = (type: ToastType, message: string, config?: ToastConfig) => {
   const id = Date.now().toString();
-  const duration = config?.duration ?? 4000;
+  const duration = config?.duration ?? 6000;
   const toast: InternalToast = { id, type, message, duration };
   subscribers.forEach((cb) => cb(toast));
 };
 
-export const toast: ToastAPI = {
+export const toast: ToastAPI & {
+  _unsubscribe: (cb: (t: InternalToast) => void) => void;
+} = {
   success: (msg, config) => notify("success", msg, config),
   error: (msg, config) => notify("error", msg, config),
   info: (msg, config) => notify("info", msg, config),
   warning: (msg, config) => notify("warning", msg, config),
   _subscribe: (cb) => subscribers.push(cb),
+  _unsubscribe: (cb) => {
+    const index = subscribers.indexOf(cb);
+    if (index !== -1) subscribers.splice(index, 1);
+  },
 };

@@ -1,6 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 import {
-  getDatabase,
   ref,
   onDisconnect,
   set,
@@ -8,28 +7,27 @@ import {
   onValue,
   type DatabaseReference,
 } from "firebase/database";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth, database } from "../firebase/firebase";
 
 const useUserPresence = () => {
   useEffect(() => {
-    const auth = getAuth();
-    const db = getDatabase();
-    const connectedRef = ref(db, '.info/connected');
+    const connectedRef = ref(database, ".info/connected");
 
     let statusRef: DatabaseReference | null = null;
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         const uid = user.uid;
-        statusRef = ref(db, `/status/${uid}`);
+        statusRef = ref(database, `/status/${uid}`);
 
         const offlineStatus = {
-          state: 'offline',
+          state: "offline",
           lastChanged: serverTimestamp(),
         };
 
         const onlineStatus = {
-          state: 'online',
+          state: "online",
           lastChanged: serverTimestamp(),
         };
 
@@ -40,14 +38,16 @@ const useUserPresence = () => {
           }
 
           // Set onDisconnect first
-          onDisconnect(statusRef!).set(offlineStatus).then(() => {
-            // Then set online status
-            set(statusRef!, onlineStatus);
-          });
+          onDisconnect(statusRef!)
+            .set(offlineStatus)
+            .then(() => {
+              // Then set online status
+              set(statusRef!, onlineStatus);
+            });
         });
       } else if (statusRef) {
         set(statusRef, {
-          state: 'offline',
+          state: "offline",
           lastChanged: serverTimestamp(),
         });
       }

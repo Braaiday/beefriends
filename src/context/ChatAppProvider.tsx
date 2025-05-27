@@ -23,6 +23,7 @@ import type { Invitation } from "../types/Invitation";
 import type { Friend } from "../types/Friend";
 import type { Chat } from "../types/Chat";
 import { useAuth } from "./AuthProvider";
+import useNotificationListener from "../hooks/useNotificationListener";
 
 interface ChatAppContextType {
   friends: Friend[];
@@ -51,6 +52,7 @@ export const ChatAppProvider: React.FC<ChatAppProviderProps> = ({
   children,
 }) => {
   useUserPresence();
+
   const { friends, friendsCount } = useFriends();
   const { invitations, invitationCount } = useInvitations();
   const { chats, loading: chatsLoading } = useChats();
@@ -58,6 +60,8 @@ export const ChatAppProvider: React.FC<ChatAppProviderProps> = ({
   const userId = user?.uid;
 
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+
+  useNotificationListener(selectedChatId);
 
   const startChatWithFriend = async (
     friendUid: string,

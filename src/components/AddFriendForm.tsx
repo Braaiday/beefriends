@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   collection,
   addDoc,
@@ -16,6 +15,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useChatApp } from "../context/ChatAppProvider";
+import { toast } from "../lib/toast";
 
 const schema = z.object({
   friendDisplayName: z.string().trim().min(1, "Username is required"),
@@ -25,7 +25,6 @@ type FormData = z.infer<typeof schema>;
 
 export const AddFriendForm = () => {
   const { user } = useAuth();
-  const [error, setError] = useState<string | null>(null);
   const { friends } = useChatApp();
 
   const {
@@ -40,8 +39,6 @@ export const AddFriendForm = () => {
   const onSubmit = async (data: FormData) => {
     if (!user?.displayName) return;
 
-    setError(null);
-
     try {
       const q = query(
         collection(firestore, "userProfiles"),
@@ -51,14 +48,14 @@ export const AddFriendForm = () => {
       const snapshot = await getDocs(q);
 
       if (snapshot.empty) {
-        setError("No user found with that name.");
+        toast.error("No user found with that name.");
         return;
       }
 
       if (
         friends.some((friend) => friend.friendName === data.friendDisplayName)
       ) {
-        setError("You are already friends with that bee.");
+        toast.error("You are already friends with that bee.");
         return;
       }
 
@@ -66,11 +63,12 @@ export const AddFriendForm = () => {
       const targetUid = userDoc.uid;
 
       if (targetUid === user.uid) {
-        setError("You can't send a request to yourself.");
+        toast.error("You can't send a request to yourself.");
         return;
       }
 
       const sortedParticipants = [user.uid, targetUid].sort();
+
       await addDoc(collection(firestore, "friendships"), {
         participants: sortedParticipants,
         friendlyNames: {
@@ -86,10 +84,18 @@ export const AddFriendForm = () => {
         createdAt: serverTimestamp(),
       });
 
+      // Add a notification for the target user
+      await addDoc(collection(firestore, "notifications"), {
+        text: `${user.displayName} sent you a friend request.`,
+        participants: [targetUid],
+        createdAt: serverTimestamp(),
+        chatId: null,
+      });
+
       reset();
     } catch (err) {
       console.error("Error sending friend request:", err);
-      setError("Something went wrong.");
+      toast.error("Something went wrong.");
     }
   };
 
@@ -124,13 +130,13 @@ export const AddFriendForm = () => {
         </div>
       </div>
 
-      {(errors.friendDisplayName || error) && (
+      {errors.friendDisplayName && (
         <p
           id="friendDisplayName-error"
           className="mt-1 text-red-500 text-xs"
           role="alert"
         >
-          {errors.friendDisplayName?.message || error}
+          {errors.friendDisplayName?.message}
         </p>
       )}
     </form>

@@ -78,6 +78,14 @@ export const MessageInput = ({ chatId }: MessageInputProps) => {
       unreadCounts: newUnreadCounts,
     });
 
+    // Add a notification for the target user
+    await addDoc(collection(firestore, "notifications"), {
+      text: `${user.displayName} sent you a new message.`,
+      participants: participants.filter((p) => p !== user.uid),
+      createdAt: serverTimestamp(),
+      chatId: chatId,
+    });
+
     reset();
   };
 

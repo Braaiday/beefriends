@@ -1,6 +1,5 @@
 import { Fragment, useEffect, useState } from "react";
 import { Transition } from "@headlessui/react";
-import { Icon } from "@iconify/react";
 import { toast } from "../lib/toast";
 
 type Toast = {
@@ -10,80 +9,77 @@ type Toast = {
   duration: number;
 };
 
-const getIcon = (type: Toast["type"]) => {
+const getToastImg = (type: Toast["type"]) => {
   switch (type) {
     case "success":
-      return "mdi:check-circle";
+      return "/images/HiBee.png";
     case "error":
-      return "mdi:alert-circle";
+      return "/images/ErrorBee.png";
     case "warning":
-      return "mdi:alert";
+      return "/images/CautionBee.png";
     case "info":
-      return "mdi:information";
+      return "/images/InfoBee.png";
     default:
-      return "mdi:information";
-  }
-};
-
-const getBgColor = (type: Toast["type"]) => {
-  switch (type) {
-    case "success":
-      return "bg-green-600";
-    case "error":
-      return "bg-red-600";
-    case "warning":
-      return "bg-yellow-500";
-    case "info":
-      return "bg-blue-600";
-    default:
-      return "bg-gray-600";
+      return "";
   }
 };
 
 export const ToastProvider = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [visibleMap, setVisibleMap] = useState<Record<string, boolean>>({});
 
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+  const hideToast = (id: string) => {
+    setVisibleMap((prev) => ({ ...prev, [id]: false }));
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+      setVisibleMap((prev) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [id]: _, ...rest } = prev;
+        return rest;
+      });
+    }, 1000); // should match the leave animation duration
   };
 
   useEffect(() => {
-    toast._subscribe((newToast) => {
+    const callback = (newToast: Toast) => {
       setToasts((prev) => [...prev, newToast]);
-      setTimeout(() => removeToast(newToast.id), newToast.duration);
-    });
+      setVisibleMap((prev) => ({ ...prev, [newToast.id]: true }));
+      setTimeout(() => hideToast(newToast.id), newToast.duration);
+    };
+
+    toast._subscribe(callback);
+
+    return () => {
+      toast._unsubscribe(callback);
+    };
   }, []);
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 space-y-2 w-[320px] max-w-full">
+    <div className="fixed bottom-4 left-4 z-50 space-y-8 w-[320px] max-w-full">
       {toasts.map((t) => (
         <Transition
           key={t.id}
-          show
+          show={visibleMap[t.id]}
           as={Fragment}
           appear
-          enter="transform ease-out duration-300 transition"
-          enterFrom="opacity-0 translate-y-2"
-          enterTo="opacity-100 translate-y-0"
-          leave="transition ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
+          enter="transform ease-out duration-1000 transition"
+          enterFrom="opacity-0 -translate-x-150"
+          enterTo="opacity-100 translate-x-0"
+          leave="transform ease-in duration-1000 transition"
+          leaveFrom="opacity-100 translate-x-0"
+          leaveTo="opacity-0 -translate-x-150"
         >
           <div
-            className={`relative px-4 py-3 rounded-lg shadow-md text-white flex items-start justify-between space-x-3 ${getBgColor(
-              t.type
-            )}`}
+            className={`relative px-4 py-3 rounded-lg shadow-lg text-foreground/70 flex items-start justify-between space-x-3 bg-card transition-all`}
           >
-            <div className="flex items-start space-x-2">
-              <Icon icon={getIcon(t.type)} className="w-5 h-5 mt-0.5" />
+            <div className="flex items-start space-x-2 relative w-full">
               <span className="text-sm">{t.message}</span>
+              <img
+                src={getToastImg(t.type)}
+                alt={`${t.type} icon`}
+                className="absolute -top-15 -right-20 w-24 h-24"
+              />
             </div>
-            <button
-              onClick={() => removeToast(t.id)}
-              className="text-white hover:text-gray-200 focus:outline-none"
-            >
-              <Icon icon="mdi:close" className="w-4 h-4" />
-            </button>
           </div>
         </Transition>
       ))}
