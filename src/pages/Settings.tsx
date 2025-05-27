@@ -8,6 +8,8 @@ import { RadioGroup } from "@headlessui/react";
 import clsx from "clsx";
 import { cn } from "../lib/utils";
 import { useNavigate } from "react-router-dom";
+import { doc, updateDoc } from "firebase/firestore";
+import { firestore } from "../firebase/firebase";
 
 // Sample avatar options
 const beeAvatars = [
@@ -55,13 +57,25 @@ export const Settings = () => {
   const onSubmit = async (data: SettingsFormValues) => {
     if (!user) return;
     try {
+      // Update Firebase Auth profile
       await updateProfile(user, {
+        photoURL: data.photoURL,
+      });
+
+      // Update Firestore user's document
+      const userDocRef = doc(firestore, "users", user.uid);
+      await updateDoc(userDocRef, {
+        photoURL: data.photoURL,
+      });
+
+      // Update to 'userProfiles' collection for public lookup
+      await updateDoc(doc(firestore, "userProfiles", user.uid), {
         photoURL: data.photoURL,
       });
 
       navigate("/app");
     } catch (error) {
-      console.error(error);
+      console.error("Error updating profile or Firestore:", error);
     }
   };
 
