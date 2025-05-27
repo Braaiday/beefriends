@@ -29,6 +29,11 @@ export const ChatListItem = ({ chat }: FriendListItemProps) => {
   const chatName = chat.friendlyNames[friendsId ?? 0];
   const photoUrl = chat.photoURLs[friendsId ?? 0];
 
+  // Hide chat if it's a draft (no messages) and current user is NOT the creator
+  if (!chat.lastMessage && chat.createdBy !== user?.uid) {
+    return null;
+  }
+
   if (!user?.uid) return null;
   const unreadCount = chat.unreadCounts?.[user?.uid] ?? 0;
 

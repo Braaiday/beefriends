@@ -21,6 +21,7 @@ export const useChats = () => {
 
       return {
         id: doc.id,
+        createdBy: data.createdBy,
         participants: data.participants,
         friendlyNames: data.friendlyNames,
         photoURLs: data.photoURLs,

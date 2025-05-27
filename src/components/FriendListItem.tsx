@@ -6,9 +6,10 @@ import { Avatar } from "./Avatar";
 
 interface FriendListItemProps {
   friend: Friend;
+  onSelect?: () => void;
 }
 
-export const FriendListItem = ({ friend }: FriendListItemProps) => {
+export const FriendListItem = ({ friend, onSelect }: FriendListItemProps) => {
   const status = useUserStatus(friend.friendUid) || "offline";
 
   const { startChatWithFriend } = useChatApp();
@@ -20,6 +21,7 @@ export const FriendListItem = ({ friend }: FriendListItemProps) => {
         friend.friendName,
         friend.friendPhotoURL
       );
+      onSelect?.(); 
     } catch (error) {
       console.error("Failed to start chat:", error);
     }
@@ -27,7 +29,6 @@ export const FriendListItem = ({ friend }: FriendListItemProps) => {
 
   return (
     <li
-      key={friend.friendUid}
       className="flex items-center gap-3 hover:bg-primary/10 px-3 py-2 rounded-lg cursor-pointer transition-colors"
       onClick={handleClick}
     >

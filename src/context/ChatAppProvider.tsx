@@ -16,6 +16,7 @@ import {
   getDocs,
   addDoc,
   serverTimestamp,
+  updateDoc,
 } from "firebase/firestore";
 
 import type { Invitation } from "../types/Invitation";
@@ -75,7 +76,7 @@ export const ChatAppProvider: React.FC<ChatAppProviderProps> = ({
 
     const querySnapshot = await getDocs(q);
 
-    const existingChat = querySnapshot.docs.find((doc) => {
+    const existingChatDoc = querySnapshot.docs.find((doc) => {
       const data = doc.data();
       const participants: string[] = data.participants;
       return (
@@ -85,12 +86,25 @@ export const ChatAppProvider: React.FC<ChatAppProviderProps> = ({
       );
     });
 
-    if (existingChat) {
-      setSelectedChatId(existingChat.id);
-      return existingChat.id;
+    if (existingChatDoc) {
+      const data = existingChatDoc.data();
+
+      // If chat is "draft" (no lastMessage) and current user is NOT creator,
+      // update createdBy to current user to "take over" the chat
+      if (!data.lastMessage && data.createdBy !== userId) {
+        await updateDoc(existingChatDoc.ref, {
+          createdBy: userId,
+          updatedAt: serverTimestamp(),
+        });
+      }
+
+      setSelectedChatId(existingChatDoc.id);
+      return existingChatDoc.id;
     }
 
+    // Otherwise create a new chat doc normally
     const newChatDoc = await addDoc(chatsRef, {
+      createdBy: userId,
       participants: [userId, friendUid],
       friendlyNames: {
         [user.uid]: user.displayName,
