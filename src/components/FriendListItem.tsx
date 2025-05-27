@@ -1,4 +1,5 @@
 import { useChatApp } from "../context/ChatAppProvider";
+import { useUserProfile } from "../hooks/useUserProfile";
 import { useUserStatus } from "../hooks/useUserStatus";
 import { StatusColors } from "../types/StatusColors";
 import { Avatar } from "./Avatar";
@@ -14,6 +15,12 @@ interface FriendListItemProps {
 
 export const FriendListItem = ({ friend }: FriendListItemProps) => {
   const status = useUserStatus(friend.friendUid) || "offline";
+
+  const { userProfiles } = useUserProfile(friend.friendUid);
+
+  const friendProfile = userProfiles?.[0];
+  const photoUrl = friendProfile?.photoURL ?? "";
+
   const { startChatWithFriend } = useChatApp();
 
   const handleClick = async () => {
@@ -31,7 +38,7 @@ export const FriendListItem = ({ friend }: FriendListItemProps) => {
       className="flex items-center gap-3 hover:bg-primary/10 px-3 py-2 rounded-lg cursor-pointer transition-colors"
       onClick={handleClick}
     >
-      <Avatar url={null} displayName={friend.friendName} />
+      <Avatar url={photoUrl} displayName={friend.friendName} />
 
       <div className="flex flex-col">
         <span className="text-sm font-medium">{friend.friendName}</span>
