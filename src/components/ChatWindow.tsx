@@ -3,8 +3,6 @@ import { useAuth } from "../context/AuthProvider";
 import { useChatApp } from "../context/ChatAppProvider";
 import { useMessages } from "../hooks/useMessages";
 import { MessageInput } from "./MessageInput";
-import { arrayUnion, doc, updateDoc } from "firebase/firestore";
-import { firestore } from "../firebase/firebase";
 import { Icon } from "@iconify/react";
 import { Avatar } from "./Avatar";
 
@@ -13,43 +11,6 @@ export const ChatWindow = () => {
   const { selectedChatId, selectedChat } = useChatApp();
   const { messages, loading } = useMessages(selectedChatId);
   const bottomRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!user?.uid || !selectedChatId || messages.length === 0) return;
-
-    const unseenMessages = messages.filter(
-      (msg) => !msg.seenBy.includes(user.uid)
-    );
-
-    unseenMessages.forEach(async (msg) => {
-      try {
-        const msgRef = doc(
-          firestore,
-          "chats",
-          selectedChatId,
-          "messages",
-          msg.id
-        );
-        await updateDoc(msgRef, {
-          seenBy: arrayUnion(user.uid),
-        });
-      } catch (error) {
-        console.error("Error marking message as seen:", error);
-      }
-    });
-  }, [messages, selectedChatId, user?.uid]);
-
-  useEffect(() => {
-    if (!user?.uid || !selectedChatId) return;
-
-    const chatRef = doc(firestore, "chats", selectedChatId);
-
-    updateDoc(chatRef, {
-      [`unreadCounts.${user.uid}`]: 0,
-    }).catch((err) => {
-      console.error("Failed to reset unread count:", err);
-    });
-  }, [messages, selectedChatId, user?.uid]);
 
   useEffect(() => {
     if (bottomRef.current) {
