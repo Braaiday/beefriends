@@ -13,29 +13,30 @@ export const ChatListItem = ({ chat }: FriendListItemProps) => {
   const { user } = useAuth();
   const { selectedChatId, setSelectedChatId, setSelectedChat } = useChatApp();
 
-  const friendsId = chat?.participants?.find((id) => id !== user?.uid) ?? null;
+  const isGroup = chat.type === "group";
+  const friendId = chat.participants.find((id) => id !== user?.uid) ?? null;
 
-  const status = useUserStatus(friendsId) || "offline";
+  const status = useUserStatus(friendId) || "offline";
+
+  if (!user?.uid) return null;
+
+  const chatName = isGroup
+    ? chat.name || "Unnamed Group"
+    : chat.friendlyNames[friendId ?? ""] || "Unknown";
+
+  const photoUrl = isGroup ? chat.avatarUrl : chat.photoURLs[friendId ?? ""];
 
   const lastMsg = chat.lastMessage;
-
-  // Format time like "5 minutes ago"
   const timeAgo = lastMsg
     ? formatDistanceToNow(new Date(lastMsg.timestamp), {
         addSuffix: true,
       })
     : "";
 
-  const chatName = chat.friendlyNames[friendsId ?? 0];
-  const photoUrl = chat.photoURLs[friendsId ?? 0];
+  const unreadCount = chat.unreadCounts?.[user.uid] ?? 0;
 
-  // Hide chat if it's a draft (no messages) and current user is NOT the creator
-  if (!chat.lastMessage && chat.createdBy !== user?.uid) {
-    return null;
-  }
-
-  if (!user?.uid) return null;
-  const unreadCount = chat.unreadCounts?.[user?.uid] ?? 0;
+  // For private chats, only show if the user is a participant and not a draft
+  if (!isGroup && !lastMsg && chat.createdBy !== user.uid) return null;
 
   return (
     <div

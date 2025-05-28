@@ -22,8 +22,8 @@ import {
 import type { Invitation } from "../types/Invitation";
 import type { Friend } from "../types/Friend";
 import type { Chat } from "../types/Chat";
-import { useAuth } from "./AuthProvider";
 import useNotificationListener from "../hooks/useNotificationListener";
+import { useAuth } from "../context/AuthProvider";
 
 interface ChatAppContextType {
   friends: Friend[];
@@ -37,10 +37,10 @@ interface ChatAppContextType {
   selectedChat: Chat | null;
   setSelectedChatId: React.Dispatch<React.SetStateAction<string | null>>;
   setSelectedChat: React.Dispatch<React.SetStateAction<Chat | null>>;
-  startChatWithFriend: (
-    friendUid: string,
-    friendName: string,
-    friendPhotoURL: string
+  startChatWithFriend: (friend: Friend) => Promise<string | null>;
+  startGroupChat: (
+    groupName: string,
+    members: Friend[]
   ) => Promise<string | null>;
 }
 
@@ -66,9 +66,7 @@ export const ChatAppProvider: React.FC<ChatAppProviderProps> = ({
   useNotificationListener(selectedChatId);
 
   const startChatWithFriend = async (
-    friendUid: string,
-    friendName: string,
-    friendPhotoURL: string
+    friend: Friend
   ): Promise<string | null> => {
     if (!userId) return null;
 
@@ -88,15 +86,13 @@ export const ChatAppProvider: React.FC<ChatAppProviderProps> = ({
       return (
         participants.length === 2 &&
         participants.includes(userId) &&
-        participants.includes(friendUid)
+        participants.includes(friend.friendUid)
       );
     });
 
     if (existingChatDoc) {
       const data = existingChatDoc.data();
 
-      // If chat is "draft" (no lastMessage) and current user is NOT creator,
-      // update createdBy to current user to "take over" the chat
       if (!data.lastMessage && data.createdBy !== userId) {
         await updateDoc(existingChatDoc.ref, {
           createdBy: userId,
@@ -105,23 +101,21 @@ export const ChatAppProvider: React.FC<ChatAppProviderProps> = ({
       }
 
       setSelectedChatId(existingChatDoc.id);
-
       setSelectedChat({ id: existingChatDoc.id, ...data } as Chat);
 
       return existingChatDoc.id;
     }
 
-    // Otherwise create a new chat doc normally
     const newChatDoc = await addDoc(chatsRef, {
       createdBy: userId,
-      participants: [userId, friendUid],
+      participants: [userId, friend.friendUid],
       friendlyNames: {
         [user.uid]: user.displayName,
-        [friendUid]: friendName,
+        [friend.friendUid]: friend.friendName,
       },
       photoURLs: {
         [user.uid]: user.photoURL,
-        [friendUid]: friendPhotoURL,
+        [friend.friendUid]: friend.friendPhotoURL,
       },
       type: "private",
       createdAt: serverTimestamp(),
@@ -131,6 +125,58 @@ export const ChatAppProvider: React.FC<ChatAppProviderProps> = ({
 
     setSelectedChatId(newChatDoc.id);
     return newChatDoc.id;
+  };
+
+  const startGroupChat = async (
+    groupName: string,
+    members: Friend[]
+  ): Promise<string | null> => {
+    if (!userId) return null;
+
+    const chatsRef = collection(firestore, "chats");
+
+    const participantIds = [userId, ...members.map((f) => f.friendUid)];
+
+    const friendlyNames = {
+      [user.uid]: user.displayName ?? "",
+      ...Object.fromEntries(members.map((f) => [f.friendUid, f.friendName])),
+    };
+
+    const photoURLs = {
+      [user.uid]: user.photoURL ?? "",
+      ...Object.fromEntries(
+        members.map((f) => [f.friendUid, f.friendPhotoURL])
+      ),
+    };
+
+    const newGroupChat = await addDoc(chatsRef, {
+      createdBy: userId,
+      participants: participantIds,
+      friendlyNames,
+      photoURLs,
+      type: "group",
+      name: groupName,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      lastMessage: null,
+    });
+
+    setSelectedChatId(newGroupChat.id);
+
+    setSelectedChat({
+      id: newGroupChat.id,
+      createdBy: userId,
+      participants: participantIds,
+      friendlyNames,
+      photoURLs,
+      type: "group",
+      name: groupName,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      lastMessage: null,
+    });
+
+    return newGroupChat.id;
   };
 
   return (
@@ -147,6 +193,7 @@ export const ChatAppProvider: React.FC<ChatAppProviderProps> = ({
         setSelectedChatId,
         setSelectedChat,
         startChatWithFriend,
+        startGroupChat,
       }}
     >
       {children}

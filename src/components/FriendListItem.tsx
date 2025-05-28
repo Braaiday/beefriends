@@ -16,12 +16,8 @@ export const FriendListItem = ({ friend, onSelect }: FriendListItemProps) => {
 
   const handleClick = async () => {
     try {
-      await startChatWithFriend(
-        friend.friendUid,
-        friend.friendName,
-        friend.friendPhotoURL
-      );
-      onSelect?.(); 
+      await startChatWithFriend(friend);
+      onSelect?.();
     } catch (error) {
       console.error("Failed to start chat:", error);
     }
