@@ -11,6 +11,8 @@ import {
 import { firestore } from "../firebase/firebase";
 import { useAuth } from "../context/AuthProvider";
 import { useChatApp } from "../context/ChatAppProvider";
+import { useRef } from "react";
+import { setUserTyping } from "../utils/setUserTyping";
 
 interface MessageInputProps {
   chatId: string;
@@ -94,6 +96,21 @@ export const MessageInput = ({ chatId }: MessageInputProps) => {
     reset();
   };
 
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleTyping = () => {
+    if (!user) return;
+    setUserTyping(chatId, user.uid, true);
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      setUserTyping(chatId, user.uid, false);
+    }, 2000); // 2 seconds of no typing = not typing
+  };
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -104,6 +121,10 @@ export const MessageInput = ({ chatId }: MessageInputProps) => {
           type="text"
           placeholder="Type a message..."
           {...register("text")}
+          onChange={(e) => {
+            handleTyping();
+            register("text").onChange(e);
+          }}
           className="w-full rounded-l px-4 py-2 border border-border focus:outline-none"
         />
         {errors.text && (

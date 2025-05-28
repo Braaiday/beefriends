@@ -33,6 +33,12 @@ export const ChatListItem = ({ chat }: FriendListItemProps) => {
       })
     : "";
 
+  const typingUserIds = chat.typingUsers?.filter((id) => id !== user.uid) ?? [];
+
+  const typingNames = typingUserIds
+    .map((id) => chat.friendlyNames?.[id])
+    .filter(Boolean); // remove undefined/null
+
   const unreadCount = chat.unreadCounts?.[user.uid] ?? 0;
 
   // For private chats, only show if the user is a participant and not a draft
@@ -70,12 +76,19 @@ export const ChatListItem = ({ chat }: FriendListItemProps) => {
         </div>
 
         <div className="flex justify-between items-center gap-2">
-          {lastMsg && (
+          {typingNames.length > 0 ? (
+            <p className="text-xs text-accent font-medium truncate mt-1 text-left text-green-500">
+              {typingNames.length === 1
+                ? `${typingNames[0]} is typing...`
+                : `${typingNames.join(" and ")} are typing...`}
+            </p>
+          ) : lastMsg ? (
             <p className="text-xs text-muted-foreground truncate mt-1 text-left">
               {lastMsg.senderId === user?.uid ? "You: " : ""}
               {lastMsg.text}
             </p>
-          )}
+          ) : null}
+
           {unreadCount > 0 && (
             <span
               className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-2 text-xs font-semibold text-white bg-primary/60 rounded-full"

@@ -15,4 +15,5 @@ export interface Chat {
   name?: string;
   avatarUrl?: string;
   unreadCounts?: Record<string, number>;
+  typingUsers?: string[];
 }

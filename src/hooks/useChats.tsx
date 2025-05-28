@@ -39,6 +39,7 @@ export const useChats = () => {
         name: data.name,
         avatarUrl: data.avatarUrl,
         unreadCounts: data.unreadCounts,
+        typingUsers: data.typingUsers,
       };
     }) ?? [];
 
