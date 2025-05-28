@@ -1,4 +1,4 @@
-import { collection, query, where } from "firebase/firestore";
+import { collection, orderBy, query, where } from "firebase/firestore";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { firestore } from "../firebase/firebase";
 import { useAuth } from "../context/AuthProvider";
@@ -10,7 +10,8 @@ export const useChats = () => {
 
   const chatsQuery = query(
     collection(firestore, "chats"),
-    where("participants", "array-contains", userId)
+    where("participants", "array-contains", userId),
+    orderBy("updatedAt", "desc")
   );
 
   const [snapshot, loading, error] = useCollection(user ? chatsQuery : null);

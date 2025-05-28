@@ -79,8 +79,13 @@ export const MessageInput = ({ chatId }: MessageInputProps) => {
     });
 
     // Add a notification for the target user
+    const notificationMessage =
+      chat?.type === "group"
+        ? `You received a new message from ${chat.name}`
+        : `${user.displayName} sent you a new message.`;
+
     await addDoc(collection(firestore, "notifications"), {
-      text: `${user.displayName} sent you a new message.`,
+      text: notificationMessage,
       participants: participants.filter((p) => p !== user.uid),
       createdAt: serverTimestamp(),
       chatId: chatId,
