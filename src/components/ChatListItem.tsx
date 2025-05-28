@@ -53,7 +53,7 @@ export const ChatListItem = ({ chat }: FriendListItemProps) => {
       <Avatar
         url={photoUrl}
         displayName={chatName}
-        useStatus={true}
+        useStatus={!isGroup}
         status={status}
       />
 
