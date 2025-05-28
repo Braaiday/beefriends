@@ -11,7 +11,7 @@ import {
 import { firestore } from "../firebase/firebase";
 import { useAuth } from "../context/AuthProvider";
 import { useChatApp } from "../context/ChatAppProvider";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { setUserTyping } from "../utils/setUserTyping";
 
 interface MessageInputProps {
@@ -37,6 +37,7 @@ export const MessageInput = ({ chatId }: MessageInputProps) => {
     register,
     handleSubmit,
     reset,
+    setFocus,
     formState: { errors, isSubmitting },
   } = useForm<MessageFormData>({
     resolver: zodResolver(messageSchema),
@@ -110,6 +111,10 @@ export const MessageInput = ({ chatId }: MessageInputProps) => {
       setUserTyping(chatId, user.uid, false);
     }, 2000); // 2 seconds of no typing = not typing
   };
+
+  useEffect(() => {
+    setFocus("text");
+  }, [setFocus, chatId]);
 
   return (
     <form
