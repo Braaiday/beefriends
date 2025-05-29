@@ -13,6 +13,7 @@ import { useAuth } from "../context/AuthProvider";
 import { useChatApp } from "../context/ChatAppProvider";
 import { useEffect, useRef } from "react";
 import { setUserTyping } from "../utils/setUserTyping";
+import { Icon } from "@iconify/react";
 
 interface MessageInputProps {
   chatId: string;
@@ -38,7 +39,7 @@ export const MessageInput = ({ chatId }: MessageInputProps) => {
     handleSubmit,
     reset,
     setFocus,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = useForm<MessageFormData>({
     resolver: zodResolver(messageSchema),
   });
@@ -119,29 +120,28 @@ export const MessageInput = ({ chatId }: MessageInputProps) => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="p-4 border-t border-border flex gap-2"
+      className="p-4 border-t border-border flex items-end gap-2 bg-muted/40"
     >
-      <div className="flex-1">
+      <div className="flex-1 relative">
         <input
           type="text"
           placeholder="Type a message..."
+          autoComplete="off"
           {...register("text")}
           onChange={(e) => {
             handleTyping();
             register("text").onChange(e);
           }}
-          className="w-full rounded-l px-4 py-2 border border-border focus:outline-none"
+          className="w-full rounded-xl px-4 py-2 bg-background focus:ring-2 focus:ring-background focus:outline-none transition-all"
         />
-        {errors.text && (
-          <p className="text-sm text-destructive mt-1">{errors.text.message}</p>
-        )}
       </div>
+
       <button
         type="submit"
         disabled={isSubmitting}
-        className="bg-primary text-primary-foreground px-4 py-2 rounded-r hover:opacity-90 disabled:opacity-50"
+        className="cursor-pointer flex items-center justify-center rounded-xl bg-primary text-primary-foreground p-2 transition hover:opacity-90 disabled:opacity-50"
       >
-        Send
+        <Icon icon="solar:map-arrow-right-bold-duotone" className="w-6 h-6" />
       </button>
     </form>
   );
