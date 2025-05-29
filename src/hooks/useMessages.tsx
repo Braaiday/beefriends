@@ -1,47 +1,80 @@
+import { useEffect, useState, useCallback } from "react";
 import {
   collection,
   query,
   orderBy,
+  limit,
+  startAfter,
+  onSnapshot,
+  getDocs,
+  QueryDocumentSnapshot,
+  type DocumentData,
   doc,
   updateDoc,
   arrayUnion,
 } from "firebase/firestore";
-import { useCollection } from "react-firebase-hooks/firestore";
-import { useEffect, useMemo } from "react";
 import { firestore } from "../firebase/firebase";
 import type { Message } from "../types/Message";
 import { useAuth } from "../context/AuthProvider";
+import { sleep } from "../utils/sleep";
+
+const PAGE_SIZE = 30;
 
 export const useMessages = (chatId: string | null) => {
   const { user } = useAuth();
   const userId = user?.uid;
 
-  const messagesQuery = chatId
-    ? query(
-        collection(firestore, "chats", chatId, "messages"),
-        orderBy("timestamp", "asc")
-      )
-    : null;
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [lastDoc, setLastDoc] =
+    useState<QueryDocumentSnapshot<DocumentData> | null>(null);
 
-  const [snapshot, loading, error] = useCollection(messagesQuery);
+  useEffect(() => {
+    if (!chatId) return;
 
-  const messages: Message[] = useMemo(() => {
-    return (
-      snapshot?.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          senderId: data.senderId,
-          text: data.text,
-          timestamp: data.timestamp?.toDate?.() ?? new Date(0),
-          type: data.type,
-          seenBy: data.seenBy ?? [],
-        };
-      }) ?? []
+    setLoading(true);
+
+    // Query for the last PAGE_SIZE messages ordered by createdAt desc
+    const messagesRef = collection(firestore, "chats", chatId, "messages");
+    const q = query(
+      messagesRef,
+      orderBy("timestamp", "desc"),
+      limit(PAGE_SIZE)
     );
-  }, [snapshot]);
 
-  // Side effect to mark unseen messages as seen
+    // Real-time subscription
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (snapshot.empty) {
+        setMessages([]);
+        setHasMore(false);
+        setLoading(false);
+        return;
+      }
+
+      // snapshot.docs are ordered newest first, reverse to oldest first
+      const msgs = snapshot.docs
+        .map((doc) => ({
+          ...(doc.data() as Message),
+          id: doc.id,
+          timestamp: doc.data().timestamp?.toDate?.() ?? new Date(0),
+        }))
+        .reverse();
+
+      setMessages(msgs);
+
+      // Save last document for pagination (oldest in current batch)
+      setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
+
+      setHasMore(snapshot.docs.length === PAGE_SIZE);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [chatId]);
+
+  // Side effect: Mark unseen messages as seen
   useEffect(() => {
     if (!userId || !chatId || messages.length === 0) return;
 
@@ -61,7 +94,7 @@ export const useMessages = (chatId: string | null) => {
     });
   }, [messages, chatId, userId]);
 
-  // Side effect to reset unread count
+  // Side effect: Reset unread count
   useEffect(() => {
     if (!userId || !chatId) return;
 
@@ -73,5 +106,44 @@ export const useMessages = (chatId: string | null) => {
     });
   }, [messages, chatId, userId]);
 
-  return { messages, loading, error };
+  // Function to load older messages on scroll up
+  const loadOlderMessages = useCallback(async () => {
+    if (!chatId || !lastDoc || loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+
+    const messagesRef = collection(firestore, "chats", chatId, "messages");
+
+    // Query older messages before lastDoc, still ordered desc, limit PAGE_SIZE
+    const olderQuery = query(
+      messagesRef,
+      orderBy("timestamp", "desc"),
+      startAfter(lastDoc),
+      limit(PAGE_SIZE)
+    );
+
+    const snapshot = await getDocs(olderQuery);
+
+    if (!snapshot.empty) {
+      const olderMsgs = snapshot.docs
+        .map((doc) => ({
+          ...(doc.data() as Message),
+          id: doc.id,
+          timestamp: doc.data().timestamp?.toDate?.() ?? new Date(0),
+        }))
+        .reverse();
+
+      setMessages((prev) => [...olderMsgs, ...prev]); // prepend older messages
+
+      setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
+      setHasMore(snapshot.docs.length === PAGE_SIZE);
+    } else {
+      setHasMore(false);
+    }
+
+    await sleep(1000);
+    setLoadingMore(false);
+  }, [chatId, lastDoc, loadingMore, hasMore]);
+
+  return { messages, loading, loadOlderMessages, loadingMore, hasMore };
 };

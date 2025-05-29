@@ -16,7 +16,7 @@ import { setUserTyping } from "../utils/setUserTyping";
 import { Icon } from "@iconify/react";
 
 interface MessageInputProps {
-  chatId: string;
+  chatId: string | null;
 }
 
 const messageSchema = z.object({
@@ -55,7 +55,7 @@ export const MessageInput = ({ chatId }: MessageInputProps) => {
       seenBy: [user.uid],
     };
 
-    const chatRef = doc(firestore, "chats", chatId);
+    const chatRef = doc(firestore, "chats", chatId ?? "");
 
     // Add message to subcollection
     await addDoc(collection(chatRef, "messages"), messageData);
