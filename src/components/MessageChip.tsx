@@ -26,9 +26,18 @@ export const MessageChip = ({ message }: MessageChipProps) => {
         isCurrentUser ? "justify-end" : "justify-start"
       }`}
     >
-      <Avatar url={senderPhotoURL} displayName={senderDisplayName}  />
+      {!isCurrentUser && (
+        <Avatar url={senderPhotoURL} displayName={senderDisplayName} />
+      )}
 
       <div className="flex flex-col items-start max-w-[75%]">
+        {/* Display sender name only for messages from others */}
+        {!isCurrentUser && (
+          <span className="text-xs text-muted-foreground font-semibold mb-1">
+            {senderDisplayName}
+          </span>
+        )}
+
         <div
           className={`px-4 py-2 rounded-lg shadow break-words ${
             isCurrentUser
@@ -62,6 +71,10 @@ export const MessageChip = ({ message }: MessageChipProps) => {
           )}
         </div>
       </div>
+
+      {isCurrentUser && (
+        <Avatar url={senderPhotoURL} displayName={senderDisplayName} />
+      )}
     </div>
   );
 };
