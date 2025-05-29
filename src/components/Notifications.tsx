@@ -31,7 +31,7 @@ export const Notifications = () => {
       {/* Notification Button */}
       <button
         onClick={openDrawer}
-        className="p-2 rounded-full hover:bg-primary/10 transition relative"
+        className="cursor-pointer p-2 rounded-full hover:bg-primary/10 transition relative"
         title="Notifications"
       >
         <Icon

@@ -1,6 +1,6 @@
 import { Menu, MenuButton, MenuItems } from "@headlessui/react";
 import { Icon } from "@iconify/react";
-import { AddFriendForm } from "./AddFriendForm";
+import { SearchFriendForm } from "./SearchFriendForm";
 
 export const AddFriend = () => {
   return (
@@ -15,8 +15,8 @@ export const AddFriend = () => {
         />
       </MenuButton>
 
-      <MenuItems className="absolute right-0 mt-4 w-64 origin-top-right bg-card border border-border rounded-md shadow-md z-50 focus:outline-none">
-        <AddFriendForm />
+      <MenuItems className="absolute right-0 mt-4 w-80 origin-top-right bg-card border border-border rounded-md shadow-md z-50 focus:outline-none">
+        <SearchFriendForm />
       </MenuItems>
     </Menu>
   );
