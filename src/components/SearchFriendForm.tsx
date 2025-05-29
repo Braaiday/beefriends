@@ -42,7 +42,7 @@ export const SearchFriendForm = () => {
         },
         photoURLs: {
           [user.uid]: user.photoURL,
-          [targetUser.id]: targetUser.photoURL,
+          [targetUser.id]: targetUser?.photoURL ?? null,
         },
         status: "pending",
         initiatedBy: user.uid,
