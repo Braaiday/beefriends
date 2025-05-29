@@ -11,7 +11,7 @@ export const GroupAvatarCluster = ({
   photoURLs,
   participants,
   friendlyNames,
-  maxAvatars = 3,
+  maxAvatars = 2,
 }: GroupAvatarClusterProps) => {
   // Show up to maxAvatars avatars
   const avatarsToShow = participants.slice(0, maxAvatars);
