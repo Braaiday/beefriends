@@ -4,7 +4,7 @@ import { useUserStatus } from "../hooks/useUserStatus";
 import type { Chat } from "../types/Chat";
 import { Avatar } from "./Avatar";
 import { formatDistanceToNow } from "date-fns";
-import { GroupAvatarCluster } from "./GroupAvatarCluster";
+import { GroupAvatarClusterMenuItem } from "./GroupAvatarClusterMenuItem";
 
 interface FriendListItemProps {
   chat: Chat;
@@ -58,7 +58,7 @@ export const ChatListItem = ({ chat }: FriendListItemProps) => {
       }}
     >
       {isGroup ? (
-        <GroupAvatarCluster
+        <GroupAvatarClusterMenuItem
           photoURLs={chat.photoURLs}
           participants={chat.participants}
           friendlyNames={chat.friendlyNames}

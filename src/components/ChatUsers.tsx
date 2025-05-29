@@ -53,13 +53,13 @@ export const ChatUsers = () => {
 
       {isGroup && (
         <>
-          <span className="text-foreground capitalize">{groupName}</span>
+          <span className="text-sm font-medium">{groupName}</span>
 
           <GroupAvatarCluster
             photoURLs={selectedChat.photoURLs}
             participants={selectedChat.participants}
             friendlyNames={selectedChat.friendlyNames}
-            maxAvatars={10}
+            maxAvatars={2}
           />
         </>
       )}
