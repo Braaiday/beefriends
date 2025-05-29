@@ -16,6 +16,7 @@ import {
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { auth, database, firestore } from "../firebase/firebase";
 import { ref, set } from "firebase/database";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   user: User | null;
@@ -45,6 +46,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   // Signup function
   const signup = async (
@@ -102,6 +104,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
       setLoading(false);
+
+      if (firebaseUser) {
+        navigate("/app");
+      }
     });
 
     return unsubscribe;
