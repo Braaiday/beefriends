@@ -41,7 +41,7 @@ export const MessageChip = ({ message }: MessageChipProps) => {
         <div
           className={`px-4 py-2 rounded-lg shadow break-words ${
             isCurrentUser
-              ? "bg-card/20 text-foreground rounded-br-none self-end"
+              ? "bg-primary/20 text-foreground rounded-br-none self-end"
               : "bg-card text-foreground rounded-bl-none"
           }`}
         >
