@@ -3,6 +3,7 @@ import { useChatApp } from "../context/ChatAppProvider";
 import { useMessages } from "../hooks/useMessages";
 import { MessageInput } from "./MessageInput";
 import { MessageChip } from "./MessageChip";
+import { MessageSkeleton } from "./MessageSkeleton";
 
 export const ChatWindow = () => {
   const { selectedChatId } = useChatApp();
@@ -24,9 +25,11 @@ export const ChatWindow = () => {
         id="chat-messages"
       >
         {loading && (
-          <div className="text-center text-muted-foreground animate-pulse">
-            Loading messages...
-          </div>
+          <>
+            {[...Array(6)].map((_, i) => (
+              <MessageSkeleton key={i} isCurrentUser={i % 2 === 0} />
+            ))}
+          </>
         )}
 
         {!loading && messages.length === 0 && (
