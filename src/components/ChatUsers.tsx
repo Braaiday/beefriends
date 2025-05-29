@@ -16,6 +16,8 @@ export const ChatUsers = () => {
 
   const status = useUserStatus(friendId) || "offline";
 
+  const groupName = isGroup ? selectedChat.name || "Unnamed Group" : "";
+
   return (
     <>
       {selectedChat?.participants
@@ -51,6 +53,8 @@ export const ChatUsers = () => {
 
       {isGroup && (
         <>
+          <span className="text-foreground capitalize">{groupName}</span>
+
           <GroupAvatarCluster
             photoURLs={selectedChat.photoURLs}
             participants={selectedChat.participants}
