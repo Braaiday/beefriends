@@ -4,6 +4,7 @@ import { useUserStatus } from "../hooks/useUserStatus";
 import type { Chat } from "../types/Chat";
 import { Avatar } from "./Avatar";
 import { formatDistanceToNow } from "date-fns";
+import { GroupAvatarCluster } from "./GroupAvatarCluster";
 
 interface FriendListItemProps {
   chat: Chat;
@@ -56,12 +57,20 @@ export const ChatListItem = ({ chat }: FriendListItemProps) => {
         setSelectedChat(chat);
       }}
     >
-      <Avatar
-        url={photoUrl}
-        displayName={chatName}
-        useStatus={!isGroup}
-        status={status}
-      />
+      {isGroup ? (
+        <GroupAvatarCluster
+          photoURLs={chat.photoURLs}
+          participants={chat.participants}
+          friendlyNames={chat.friendlyNames}
+        />
+      ) : (
+        <Avatar
+          url={photoUrl}
+          displayName={chatName}
+          useStatus={!isGroup}
+          status={status}
+        />
+      )}
 
       <div className="flex flex-col flex-1 min-w-0">
         <div className="flex justify-between items-center gap-2 mb-1.5">

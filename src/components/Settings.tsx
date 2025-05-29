@@ -19,27 +19,23 @@ export const Settings = () => {
         <Avatar url={user?.photoURL} displayName={user?.displayName} />
       </MenuButton>
 
-      <MenuItems className="absolute right-0 mt-2 w-64 origin-top-right bg-card border border-border rounded-md shadow-md z-50 focus:outline-none">
+      <MenuItems className="absolute left-0 mt-4 w-60 h-96 origin-top-left bg-card border border-border rounded-md shadow-md z-50 focus:outline-none flex flex-col">
         <div className="py-1">
           <MenuItem>
-            {({ active }) => (
+            {() => (
               <button
                 onClick={() => navigate("settings")}
-                className={`w-full text-left px-4 py-2 text-sm ${
-                  active ? "bg-primary/10 text-foreground" : "text-foreground"
-                }`}
+                className={`cursor-pointer w-full text-left px-4 py-2 text-sm hover:bg-primary/20`}
               >
                 Account Settings
               </button>
             )}
           </MenuItem>
           <MenuItem>
-            {({ active }) => (
+            {() => (
               <button
                 onClick={async () => await logout()}
-                className={`w-full text-left px-4 py-2 text-sm ${
-                  active ? "bg-primary/10 text-foreground" : "text-foreground"
-                }`}
+                className={`cursor-pointer w-full text-left px-4 py-2 text-sm hover:bg-primary/20`}
               >
                 Logout
               </button>

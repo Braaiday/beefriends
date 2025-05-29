@@ -84,12 +84,12 @@
   }
 
   .dark {
-    --background: 222 47% 4%;
-    --foreground: 213 31% 91%;
-    --card: 222 47% 8%;
+    --background: 215 25% 15%;
+    --foreground: 220 15% 85%;
+    --card: 218 22% 18%;
     --primary: 45 100% 50%;
     --primary-foreground: 0 0% 100%;
-    --border: 217 33% 20%;
+    --border: 220 20% 30%;
   }
 
   * {

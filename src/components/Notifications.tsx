@@ -105,7 +105,7 @@ export const Notifications = () => {
                                 <Avatar
                                   url={invitation.photoURLs[senderUid]}
                                   displayName={senderName}
-                                  size={36}
+                                 
                                 />
                                 <div className="text-sm text-foreground">
                                   <div>

@@ -133,6 +133,7 @@ export const MessageInput = ({ chatId }: MessageInputProps) => {
             register("text").onChange(e);
           }}
           className="w-full rounded-xl px-4 py-2 bg-background focus:ring-2 focus:ring-background focus:outline-none transition-all"
+          disabled={!chatId}
         />
       </div>
 

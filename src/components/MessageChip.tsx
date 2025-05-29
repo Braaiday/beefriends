@@ -26,13 +26,13 @@ export const MessageChip = ({ message }: MessageChipProps) => {
         isCurrentUser ? "justify-end" : "justify-start"
       }`}
     >
-      <Avatar url={senderPhotoURL} displayName={senderDisplayName} size={32} />
+      <Avatar url={senderPhotoURL} displayName={senderDisplayName}  />
 
       <div className="flex flex-col items-start max-w-[75%]">
         <div
           className={`px-4 py-2 rounded-lg shadow break-words ${
             isCurrentUser
-              ? "bg-primary text-primary-foreground rounded-br-none self-end"
+              ? "bg-card/20 text-foreground rounded-br-none self-end"
               : "bg-card text-foreground rounded-bl-none"
           }`}
         >
