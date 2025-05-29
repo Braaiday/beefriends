@@ -59,6 +59,7 @@ export const ChatUsers = () => {
             photoURLs={selectedChat.photoURLs}
             participants={selectedChat.participants}
             friendlyNames={selectedChat.friendlyNames}
+            maxAvatars={10}
           />
         </>
       )}
