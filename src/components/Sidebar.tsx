@@ -85,8 +85,31 @@ export const Sidebar = () => {
       )}
 
       {/* Filtered Chat List */}
-      {!chatsLoading &&
-        filteredChats.map((chat) => <ChatListItem chat={chat} key={chat.id} />)}
+      {!chatsLoading && (
+        <>
+          {filteredChats.length > 0 ? (
+            filteredChats.map((chat) => (
+              <ChatListItem chat={chat} key={chat.id} />
+            ))
+          ) : search ? (
+            <div className="text-center mt-4 px-2">
+              <p className="text-sm text-muted mb-2">
+                <strong>Results (0)</strong>
+              </p>
+              <div className="bg-background border border-border rounded-lg p-4 shadow-sm">
+                <p className="text-sm text-muted-foreground">
+                  No chats found for <strong>"{search}"</strong>.<br />
+                  Try checking for typos or searching with a different name.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted text-center mt-4">
+              No chats available.
+            </p>
+          )}
+        </>
+      )}
     </aside>
   );
 };

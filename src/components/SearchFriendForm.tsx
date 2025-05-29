@@ -72,12 +72,25 @@ export const SearchFriendForm = () => {
         className="w-full px-3 py-2 text-sm rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary transition"
       />
 
-      {searchLoading && <p className="text-sm mt-2 text-muted">Searching...</p>}
+      {!searchLoading && searchResults?.length === 0 && debouncedQuery && (
+        <div className="w-full text-center mt-4">
+          <p className="text-sm text-muted mb-2">
+            <strong>Results (0)</strong>
+          </p>
+          <div className="bg-background border border-border rounded-lg p-4 shadow-sm">
+            <p className="text-sm text-muted-foreground">
+              No results found for <strong>"{debouncedQuery}"</strong>.<br />
+              Try checking for typos or using complete words.
+            </p>
+          </div>
+        </div>
+      )}
+
       {searchError && (
         <p className="text-sm mt-2 text-red-500">Error loading users.</p>
       )}
 
-      <ul className="flex-1 overflow-y-auto px-2 pb-2 space-y-2 mt-2">
+      <ul className="flex-1 overflow-y-auto px-2 space-y-2 mt-2">
         {!searchLoading &&
           searchResults?.map((userProfile) => {
             return (
